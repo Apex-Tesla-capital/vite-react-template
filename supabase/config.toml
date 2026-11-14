@@ -1,0 +1,6 @@
+[api]
+schemas = ["public", "core"]
+
+[auth.hook.custom_access_token]
+enabled = true
+uri = "pg-function://postgres/core/custom_access_token_hook"
