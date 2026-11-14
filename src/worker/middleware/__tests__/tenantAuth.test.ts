@@ -22,7 +22,7 @@ const testBindings = {
   SUPABASE_ANON_KEY: 'test-anon-key',
 };
 
- describe('tenantAuthMiddleware', () => {
+describe('tenantAuthMiddleware', () => {
   const mockCreateClient = vi.mocked(createClient);
   let app: Hono<TenantEnv>;
   let mockSupabaseInstance: MockSupabaseClient;
@@ -31,7 +31,7 @@ const testBindings = {
     vi.clearAllMocks();
     mockSupabaseInstance = { auth: { getClaims: vi.fn() } };
     mockCreateClient.mockImplementation(
-      () => mockSupabaseInstance as unknown as SupabaseClient<CoreDatabase>,
+      () => mockSupabaseInstance as unknown as SupabaseClient<CoreDatabase, 'core'>,
     );
 
     app = new Hono<TenantEnv>();

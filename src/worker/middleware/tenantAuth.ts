@@ -56,7 +56,7 @@ export type TenantEnv = {
     userId: string;
     tenantId: string;
     tenantRole: TenantRole;
-    userSupabase: SupabaseClient<CoreDatabase>;
+    userSupabase: SupabaseClient<CoreDatabase, 'core'>;
   };
 };
 
@@ -75,7 +75,7 @@ export async function tenantAuthMiddleware(c: Context<TenantEnv>, next: Next) {
   }
   const token = parts[1].trim();
 
-  const verifier = createClient<CoreDatabase>(c.env.SUPABASE_URL, c.env.SUPABASE_ANON_KEY, {
+  const verifier = createClient<CoreDatabase, 'core'>(c.env.SUPABASE_URL, c.env.SUPABASE_ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
@@ -97,7 +97,7 @@ export async function tenantAuthMiddleware(c: Context<TenantEnv>, next: Next) {
     return c.json({ error: 'Forbidden: Invalid or malformed authorization claims' }, 403);
   }
 
-  const userSupabase = createClient<CoreDatabase>(c.env.SUPABASE_URL, c.env.SUPABASE_ANON_KEY, {
+  const userSupabase = createClient<CoreDatabase, 'core'>(c.env.SUPABASE_URL, c.env.SUPABASE_ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: { headers: { Authorization: `Bearer ${token}` } },
   });
