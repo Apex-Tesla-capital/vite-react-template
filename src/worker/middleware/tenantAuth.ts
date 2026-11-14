@@ -1,7 +1,51 @@
 import { Context, Next } from 'hono';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type TenantRole = 'owner' | 'admin' | 'member';
+
+/** Minimal Supabase schema typing needed by this Worker. */
+export type CoreDatabase = {
+  public: {
+    Tables: {};
+    Views: {};
+    Functions: {};
+    Enums: {};
+    CompositeTypes: {};
+  };
+  core: {
+    Tables: {
+      settlements: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          amount: number;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          amount: number;
+          status?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          amount?: number;
+          status?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+    };
+    Views: {};
+    Functions: {};
+    Enums: {};
+    CompositeTypes: {};
+  };
+};
 
 export type TenantEnv = {
   Bindings: {
@@ -12,7 +56,7 @@ export type TenantEnv = {
     userId: string;
     tenantId: string;
     tenantRole: TenantRole;
-    userSupabase: ReturnType<typeof createClient>;
+    userSupabase: SupabaseClient<CoreDatabase>;
   };
 };
 
@@ -31,7 +75,7 @@ export async function tenantAuthMiddleware(c: Context<TenantEnv>, next: Next) {
   }
   const token = parts[1].trim();
 
-  const verifier = createClient(c.env.SUPABASE_URL, c.env.SUPABASE_ANON_KEY, {
+  const verifier = createClient<CoreDatabase>(c.env.SUPABASE_URL, c.env.SUPABASE_ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
@@ -53,7 +97,7 @@ export async function tenantAuthMiddleware(c: Context<TenantEnv>, next: Next) {
     return c.json({ error: 'Forbidden: Invalid or malformed authorization claims' }, 403);
   }
 
-  const userSupabase = createClient(c.env.SUPABASE_URL, c.env.SUPABASE_ANON_KEY, {
+  const userSupabase = createClient<CoreDatabase>(c.env.SUPABASE_URL, c.env.SUPABASE_ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: { headers: { Authorization: `Bearer ${token}` } },
   });
